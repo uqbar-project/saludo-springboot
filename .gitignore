@@ -34,3 +34,4 @@ build/
 /target/
 bin
 generated*
+xtend-gen
