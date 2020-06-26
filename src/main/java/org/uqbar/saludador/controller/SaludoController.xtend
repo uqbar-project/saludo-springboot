@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseBody
+import org.springframework.web.server.ResponseStatusException
 
 @Controller
 class SaludoController {
@@ -32,9 +33,12 @@ class SaludoController {
 	@RequestMapping(value = "/saludoDefault", method = PUT)
 	@ResponseBody
     def actualizarSaludo(@RequestBody String nuevoSaludo) {
-    	// TODO: No se puede saludar a Dodain
-        this.saludador.saludoDefault = nuevoSaludo
-        new ResponseEntity(HttpStatus.OK)
+    	try {
+	        this.saludador.cambiarSaludoDefault(nuevoSaludo)
+	        new ResponseEntity(HttpStatus.OK)
+    	} catch (BusinessException e) {
+    		throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.message)
+    	}
     }
     
 }
@@ -42,6 +46,8 @@ class SaludoController {
 
 class Saludador {
 	static int ultimoId = 1
+	static String DODAIN = "dodain"
+
 	@Accessors String saludoDefault = "Hola mundo!"
 	
 	def buildSaludo() {
@@ -51,6 +57,12 @@ class Saludador {
 	def buildSaludoCustom(String mensaje) {
 		new Saludo(ultimoId++, mensaje)
 	}
+	
+	def cambiarSaludoDefault(String nuevoSaludo) {
+		if (nuevoSaludo.equalsIgnoreCase(DODAIN)) {
+			throw new BusinessException("No se puede saludar a " + DODAIN)
+		}
+	}
 }
 
 @Data
@@ -58,4 +70,12 @@ class Saludo implements Serializable {
 	int id
 	String saludo
 	LocalDateTime fechaCreacion = LocalDateTime.now
+}
+
+class BusinessException extends RuntimeException {
+	
+	new(String msg) {
+		super(msg)
+	}
+
 }
