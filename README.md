@@ -89,31 +89,29 @@ Veamos una posible solución:
 @Controller
 class SaludoController {
 	
-	Saludador saludador = new Saludador()
+  Saludador saludador = new Saludador()
 	
-	@RequestMapping(value = "/saludoDefault", method = GET)
-	@ResponseBody
-    def darSaludo() {
-        this.saludador.buildSaludo()
-    }
+  @RequestMapping(value = "/saludoDefault", method = GET)
+  @ResponseBody
+  def darSaludo() {
+    this.saludador.buildSaludo()
+  }
 
 }
 
 class Saludador {
-	...
-
-	@Accessors String saludoDefault = "Hola mundo!"
+  @Accessors String saludoDefault = "Hola mundo!"
 	
-	def buildSaludo() {
-		buildSaludoCustom(this.saludoDefault)
-	}
+  def buildSaludo() {
+    buildSaludoCustom(this.saludoDefault)
+  }
 }
 
 @Data
 class Saludo implements Serializable {
-	int id
-	String saludo
-	LocalDateTime fechaCreacion = LocalDateTime.now
+  int id
+  String saludo
+  LocalDateTime fechaCreacion = LocalDateTime.now
 }
 ```
 
@@ -146,9 +144,9 @@ Eso nos devuelve algo como
 
 ```json
 {
-	"id": 1,
-	"saludo":"Hola mundo!",
-	"fechaCreacion":"2020-06-26T22:03:31.444752"
+  "id": 1,
+  "saludo":"Hola mundo!",
+  "fechaCreacion":"2020-06-26T22:03:31.444752"
 }
 ```
 
