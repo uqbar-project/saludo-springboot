@@ -1,6 +1,5 @@
 package org.uqbar.saludador.controller
 
-import java.io.Serializable
 import java.time.LocalDateTime
 import org.eclipse.xtend.lib.annotations.Accessors
 import org.eclipse.xtend.lib.annotations.Data
@@ -66,7 +65,7 @@ class Saludador {
 }
 
 @Data
-class Saludo implements Serializable {
+class Saludo {
 	int id
 	String saludo
 	LocalDateTime fechaCreacion = LocalDateTime.now
