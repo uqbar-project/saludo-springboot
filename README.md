@@ -211,11 +211,10 @@ class SaludoController {
     this.saludador.cambiarSaludoDefault(nuevoSaludo)
     new ResponseEntity("Se actualizó el saludo correctamente", HttpStatus.OK)
   }
+}
 
 class Saludador {
-	static String DODAIN = "dodain"
-
-  ...
+  static String DODAIN = "dodain"
 
   def cambiarSaludoDefault(String nuevoSaludo) {
     if (nuevoSaludo.equalsIgnoreCase(DODAIN)) {
@@ -249,6 +248,33 @@ El contrato de los errores de http es:
 | 50x (500, 501, 502...) | Error de programa (división por cero, referencia nula, etc.) |
 
 Para más referencia pueden ver https://http.cat/, https://httpstatusdogs.com/, entre otros.
+
+Modificamos entonces nuestra respuesta cuando ocurra un error de negocio, en el controller:
+
+```xtend
+@PutMapping(value = "/saludoDefault")
+def actualizarSaludo(@RequestBody String nuevoSaludo) {
+  try {
+    this.saludador.cambiarSaludoDefault(nuevoSaludo)
+    new ResponseEntity("Se actualizó el saludo correctamente", HttpStatus.OK)
+  } catch (BusinessException e) {
+    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.message)
+  }
+}
+```
+
+Ahora sí, cuando queremos saludar a Dodain, en lugar de un 500 recibimos un 400 (BAD_REQUEST), que permite a nuestro cliente entender más la causa del problema:
+
+```json
+{
+    "timestamp": "2020-06-28T15:17:41.049+00:00",
+    "status": 400,
+    "error": "Bad Request",
+    "trace": "... stack trace ...",
+    "message": "No se puede saludar a dodain",
+    "path": "/saludoDefault"
+}
+```
 
 ### Contrato general para métodos de una API REST
 

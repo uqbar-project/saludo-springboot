@@ -29,12 +29,12 @@ class SaludoController {
 
 	@PutMapping(value = "/saludoDefault")
     def actualizarSaludo(@RequestBody String nuevoSaludo) {
-//    	try {
+    	try {
 	        this.saludador.cambiarSaludoDefault(nuevoSaludo)
 	        new ResponseEntity("Se actualizó el saludo correctamente", HttpStatus.OK)
-//    	} catch (BusinessException e) {
-//    		throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.message)
-//    	}
+    	} catch (BusinessException e) {
+    		throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.message)
+    	}
     }
     
 }
