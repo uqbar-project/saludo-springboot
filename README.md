@@ -86,13 +86,12 @@ Es frecuente que el controller se termine transformando en un objeto con mucha r
 Veamos una posible solución:
 
 ```xtend
-@Controller
+@RestController
 class SaludoController {
 	
   Saludador saludador = new Saludador()
 	
-  @RequestMapping(value = "/saludoDefault", method = GET)
-  @ResponseBody
+  @GetMapping(value = "/saludoDefault")
   def darSaludo() {
     this.saludador.buildSaludo()
   }
@@ -125,12 +124,11 @@ class Saludo implements Serializable {
 Si vieron la definición del método en el controller
 
 ```xtend
-	@RequestMapping(value = "/saludoDefault", method = GET)
-	@ResponseBody
-  def darSaludo() {
+@GetMapping(value = "/saludoDefault")
+def darSaludo() {
 ```
 
-la annotation `RequestMapping` permite asociarla con una **ruta** de nuestro web server, que se forma con
+la annotation `GetMapping` permite asociarla con una **ruta** de nuestro web server, que se forma con
 
 - nuestra IP (`localhost`)
 - el puerto (que por defecto es 8080)
@@ -140,7 +138,7 @@ Esto permite que levantemos nuestro servidor Jetty con Springboot y desde un nav
 
 `http://localhost:8080/saludoDefault`
 
-Eso nos devuelve algo como
+lo que devolverá algo similar a
 
 ```json
 {
@@ -150,17 +148,126 @@ Eso nos devuelve algo como
 }
 ```
 
-La respuesta se publica en el body del navegador gracias a la annotation `@ResponseBody`.
+La respuesta se publica en el body del navegador gracias a que definimos que nuestro controller es REST mediante la anotación `@RestController`. Más adelante veremos diferentes técnicas para convertir a JSON nuestros objetos.
 
 ### Método PUT
 
-### Qué otros métodos hay
+Si queremos modificar el saludo por defecto, que está en la clase Saludador como `@Accessors String saludoDefault = "Hola mundo!"`, tenemos que crear un método nuevo en el controller:
 
-### Probarlo con un cliente REST
+- dado que estaremos invocando una acción que modifica el estado de mi sistema, podemos utilizar el método `PUT` o el `PATCH`. Pueden ver [la diferencia entre pisar todos los valores de mi estado (PUT) vs. modificar solo una parte del estado (PATCH) en este artículo](https://stackoverflow.com/questions/28459418/use-of-put-vs-patch-methods-in-rest-api-real-life-scenarios). Es importante **respetar el contrato que definen las especificaciones de http para facilitar a quien quiere utilizar nuestros servicios**.
+- el método que escribiremos en el controller también se llama **endpoint**
+- podemos pasarle parámetros en el header, pero vamos a preferir utilizar el body. En este caso sencillo vamos a pasar un string plano, en otros donde necesitemos pasar más información evitaremos el _long parameter method_ abstrayendo un objeto, que se escribirá como un JSON en nuestro cliente.
+
+Veamos la definición del controller:
+
+```xtend
+@PutMapping(value = "/saludoDefault")
+def actualizarSaludo(@RequestBody String nuevoSaludo) {
+	this.saludador.saludoDefault = nuevoSaludo
+	new ResponseEntity("Se actualizó el saludo correctamente", HttpStatus.OK)
+}
+```
+
+El controller delega al setter implícito del Saludador, y luego devuelve
+
+- un mensaje en el body
+- y un código de HTTP, donde OK = 200
+
+![http 200 t-shirt](./images/everything-is-going-to-be-200-OK.png)
+
+### ¿Dónde lo pruebo?
+
+Para probar nuestro endpoint utilizaremos [POSTMAN](https://www.postman.com/downloads/) (otras variantes son [Insomnia](https://support.insomnia.rest/article/23-installation), [Advanced REST Client](https://chrome.google.com/webstore/detail/advanced-rest-client/hgmloofddffdnphfgcellkdfbfbjeloo?hl=es)), el cliente web de nuestra aplicación. Hay que seguir los siguientes pasos:
+
+- configurar el endpoint
+- definirle el método PUT
+- ir a la solapa body y escribir un saludo default
+- ejecutar el endpoint
+
+![calling put method](./images/putMethod.gif)
+
+En el video vemos cómo levantamos la aplicación, luego vamos a POSTMAN, creamos una collection que agrupa varios requests, y luego configuramos la llamada al endpoint. Por último, luego de ejecutar vemos la respuesta en el body y el status 200.
+
+Si ahora hacemos el pedido vía GET, veremos que nuestro saludo default se modificó:
+
+![get method after put](./images/getMethodAfterPut.gif)
 
 ## Manejo de errores y códigos HTTP
 
-## Cómo testear endpoints
+Surge un agregado: no queremos que se pueda configurar "Dodain" como saludo default. Esta restricción, ¿dónde la ubicamos?
+
+- en el controller
+- en el Saludador
+- en el constructor del objeto saludo
+
+El objeto saludo es un value object, su objetivo es proveer un saludo inmutable. Es extraño tener una validación en el constructor, podríamos evitar esa llamada. Por otra parte, el controller tiene como objetivos adaptar los pedidos por http para que sean recibidos por el negocio que trabaja con el modelo de objetos. Si tenemos alguna otra forma de acceder a los objetos de negocio, tendremos que duplicar esa validación en algún otro lado. No parece ser responsabilidad del controller agregar este control que es propio del dominio.
+
+Entonces modificamos un poco el negocio, para tener un método cambiarSaludo en Saludador, y hacemos que el controller llame a ese método:
+
+```xtend
+class SaludoController {
+  @PutMapping(value = "/saludoDefault")
+  def actualizarSaludo(@RequestBody String nuevoSaludo) {
+    this.saludador.cambiarSaludoDefault(nuevoSaludo)
+    new ResponseEntity("Se actualizó el saludo correctamente", HttpStatus.OK)
+  }
+
+class Saludador {
+	static String DODAIN = "dodain"
+
+  ...
+
+  def cambiarSaludoDefault(String nuevoSaludo) {
+    if (nuevoSaludo.equalsIgnoreCase(DODAIN)) {
+      throw new BusinessException("No se puede saludar a " + DODAIN)
+    }
+    this.saludoDefault = nuevoSaludo
+  }
+```
+
+¿Qué recibimos cuando queremos modificar nuestro saludo a "dodain"?
+
+```json
+{
+    "timestamp": "2020-06-28T14:46:09.179+00:00",
+    "status": 500,
+    "error": "Internal Server Error",
+    "trace": "...el stack trace...",
+    "message": "No se puede saludar a dodain",
+    "path": "/saludoDefault"
+}
+```
+
+Bueno, el servidor Web de Java es inteligente y está haciendo un catch del error para que no se rompa. Pero el código de error que está devolviendo es **500** o _Internal Server Error_, es decir, [una excepción de programa, cuando en realidad se trata de un error de usuario](https://docs.google.com/document/d/1G0a9j-OA0rIEA5cdvEhIMbztJVo86ssvZKBK8HL9akg/edit#heading=h.3spsnsjiejzj).
+
+El contrato de los errores de http es:
+
+| Código de error | Qué indica |
+| --- | --- |
+| 20x (200, 201, 202...) | Todo anduvo ok |
+| 40x (400, 401, 402...) | Error de usuario (faltan parámetros, faltan permisos, no estás autenticado, no existe lo que quiero actualizar, etc.) |
+| 50x (500, 501, 502...) | Error de programa (división por cero, referencia nula, etc.) |
+
+Para más referencia pueden ver https://http.cat/, https://httpstatusdogs.com/, entre otros.
+
+### Contrato general para métodos de una API REST
+
+Cuando definamos un endpoint los métodos a utilizar según la [RFC-7231](https://tools.ietf.org/html/rfc7231#section-4) son:
+
+| Método | Objetivo |
+| --- | --- | 
+| GET | Obtener información de un recurso |
+| HEAD | Igual que GET, pero solo transmite status y header |
+| POST | Generalmente asociado al alta de un recurso, también sirve para hacer el procesamiento de la información o _payload_ enviada |
+| PUT | Reemplaza completamente el recurso en el servidor con el _payload_ que le pasamos en el pedido |
+| PATCH | La información recibida en el _payload_ actualiza el recurso, el resto de la información en el servidor permanece igual |
+| DELETE | Eliminamos todas las representaciones del recurso en el servidor |
+
+Para más información pueden consultar [la especificación oficial para el protocolo http](https://tools.ietf.org/html/rfc7230) y [este artículo que discute la diferencia entre POST, PUT y PATCH](https://www.mscharhag.com/api-design/http-post-put-patch).
+
+TODO: Hablar de idempotencia.
+
+## Testeo unitario de endpoints
 
 ## Resumen de la arquitectura
 
