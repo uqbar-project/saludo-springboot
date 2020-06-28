@@ -1,5 +1,6 @@
 package org.uqbar.saludador.controller
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import java.time.LocalDateTime
 import org.eclipse.xtend.lib.annotations.Accessors
 import org.eclipse.xtend.lib.annotations.Data

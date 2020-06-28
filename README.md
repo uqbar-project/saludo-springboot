@@ -291,9 +291,23 @@ Cuando definamos un endpoint los métodos a utilizar según la [RFC-7231](https:
 
 Para más información pueden consultar [la especificación oficial para el protocolo http](https://tools.ietf.org/html/rfc7230) y [este artículo que discute la diferencia entre POST, PUT y PATCH](https://www.mscharhag.com/api-design/http-post-put-patch).
 
-TODO: Hablar de idempotencia.
+### Idempotencia
+
+La especificación de http pide que los métodos GET, HEAD, PUT y DELETE sean [**idempotentes**](https://es.wikipedia.org/wiki/Idempotencia), es decir, que el request http se pueda realizar varias veces y aun así conseguir el mismo resultado que se obtendría si se realizase una sola vez. Es una buena práctica respetar este contrato:
+
+- las operaciones GET, al no tener efecto colateral, garantizan esta propiedad
+- las operaciones DELETE, la primera vez borran el recurso (y se obtiene un 200 - OK), luego tendremos un 404 (recurso no encontrado), lo cual está bien **porque el servidor mantiene el mismo estado que luego de invocar la primera operación DELETE**
+- sucesivas operaciones PUT no deberían producir cambios: la primera vez se hace la modificación, y luego se pisa el mismo valor una y otra vez.
+- la única operación que no puede garantizar la idempotencia es el método **POST**, porque cada vez que se invoca crea un nuevo recurso.
+
+Para más información pueden investigar:
+
+- [la especificación RFC-7231](https://tools.ietf.org/html/rfc7231#section-4.2.2)
+- [el artículo de Mozilla](https://developer.mozilla.org/en-US/docs/Glossary/idempotent)
 
 ## Testeo unitario de endpoints
+
+
 
 ## Resumen de la arquitectura
 
