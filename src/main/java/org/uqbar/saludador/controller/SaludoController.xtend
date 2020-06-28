@@ -5,39 +5,36 @@ import org.eclipse.xtend.lib.annotations.Accessors
 import org.eclipse.xtend.lib.annotations.Data
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.stereotype.Controller
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.ResponseBody
+import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
 
-@Controller
+@RestController
 class SaludoController {
 	
 	Saludador saludador = new Saludador()
 	
-	@RequestMapping(value = "/saludoDefault", method = GET)
-	@ResponseBody
+	@GetMapping(value = "/saludoDefault")
     def darSaludo() {
         this.saludador.buildSaludo()
     }
 
-	@RequestMapping(value = "/saludo/{persona}", method = GET)
-	@ResponseBody
+	@GetMapping(value = "/saludo/{persona}")
     def darSaludoCustom(@PathVariable String persona) {
         this.saludador.buildSaludoCustom("Hola " + persona + "!")
     }
 
-	@RequestMapping(value = "/saludoDefault", method = PUT)
-	@ResponseBody
+	@PutMapping(value = "/saludoDefault")
     def actualizarSaludo(@RequestBody String nuevoSaludo) {
-    	try {
+//    	try {
 	        this.saludador.cambiarSaludoDefault(nuevoSaludo)
-	        new ResponseEntity(HttpStatus.OK)
-    	} catch (BusinessException e) {
-    		throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.message)
-    	}
+	        new ResponseEntity("Se actualizó el saludo correctamente", HttpStatus.OK)
+//    	} catch (BusinessException e) {
+//    		throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.message)
+//    	}
     }
     
 }
@@ -61,6 +58,7 @@ class Saludador {
 		if (nuevoSaludo.equalsIgnoreCase(DODAIN)) {
 			throw new BusinessException("No se puede saludar a " + DODAIN)
 		}
+		this.saludoDefault = nuevoSaludo
 	}
 }
 
