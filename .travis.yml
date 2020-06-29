@@ -1,0 +1,9 @@
+language: java
+jdk:
+  - oraclejdk11
+
+script:
+  - mvn -e -DTRAVIS_JOB_ID=$TRAVIS_JOB_ID clean install
+
+
+
