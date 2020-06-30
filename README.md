@@ -319,7 +319,7 @@ Para el testeo de endpoints, recomendamos [leer este artículo](https://thepract
 
 Un dato interesante es que si primero se ejecuta el test que cambia el saludo default, eso no debe interferir en el primer test, que espera una respuesta en base a la configuración inicial.
 
-Veamos entonces cómo configurar el grupo de tests:
+Veamos entonces cómo configurar el grupo de tests
 
 ```xtend
 @AutoConfigureJsonTesters
@@ -333,8 +333,62 @@ class SaludoControllerTest {
 	MockMvc mockMvc
 ```
 
-- `@ContextConfiguration` arma una configuración de Spring para testeo, allí debemos especificar cuál es el o los controllers que estamos testeando
-- `@AutoConfigureJsonTesters` permite que podamos
+Las configuraciones importantes son:
+
+- `@ContextConfiguration` indicando el o los controllers que estamos testeando
+- `@AutoConfigureJsonTesters` permite habilitar la serialización a JSON de las respuestas de cada endpoint
+- `@DirtiesContext` es necesario en este caso para probar la actualización del saludo default garantizando la independencia con el test que prueba el saludo inicial "Hola mundo!". De lo contrario podés tener _flaky tests_ dependiendo del orden en el que se evalúen.
+
+Cada test levanta un servidor Spring en modo test, que es más liviano. Sobre él vamos a correr cada escenario:
+
+```xtend
+@DisplayName("el saludo default es el que tiene el saludador")
+@Test
+def void testObtenerSaludoDefault() {
+  val responseEntity = mockMvc.perform(MockMvcRequestBuilders.get("/saludoDefault")). andReturn.response
+  assertEquals(200, responseEntity.status)
+  assertEquals(responseEntity.getField("saludo"), "Hola mundo!")
+}
+```
+
+El primer test hace el llamado a la URI "/saludoDefault" vía get (por eso el método es `MockMvcRequestBuilders.get`), captura la respuesta y verificamos
+
+- que el código de http es 200
+- que el JSON tiene un atributo "saludo" con el valor "Hola mundo!" (para eso nos valemos de un _extension method_ getField, que pueden ver en el archivo, lo que hace es convertir la respuesta JSON que se ve como string, a un mapa de propiedades y luego obtiene el valor de la propiedad que estamos buscando)
+
+Ahora veremos el test que prueba el caso inválido al actualizar el saludo por defecto
+
+```xtend
+@DisplayName("actualizar el saludo a un valor inválido produce un error de usuario")
+@Test
+def void testActualizarSaludoDefaultIncorrecto() {
+  val responseEntity = mockMvc.perform(MockMvcRequestBuilders.put("/saludoDefault").content("dodain")).andReturn.response
+  assertEquals(400, responseEntity.status)
+}
+```
+
+Podríamos chequear el mensaje de error, esto acopla un poco más el test a la regla de negocio (cualquier cambio en el mensaje de error rompe el test). Como el método http es PUT, el método que usamos es `MockMvcRequestBuilders.put`
+
+El tercer test tiene como parte interesante que estamos forzando el character set a UTF-8 para no tener problemas con las tildes (algo que Spring Boot decidió cambiar a partir de la versión 2.2.0). Luego lo que hace es bastante directo:
+
+- actualiza el saludo default
+- para luego verificar mediante una llamada GET
+
+```xtend
+@DisplayName("actualizar el saludo a un valor válido actualiza correctamente")
+@Test
+def void testActualizarSaludoDefaultOk() {
+	val nuevoSaludoDefault = "Hola San Martín!"
+	val responseEntityPut = mockMvc.perform(MockMvcRequestBuilders.put("/saludoDefault").content(nuevoSaludoDefault)).andReturn.response
+	assertEquals(200, responseEntityPut.status)
+	val responseEntityGet = mockMvc.perform(MockMvcRequestBuilders.get("/saludoDefault")).andReturn.response
+	responseEntityGet.characterEncoding = "UTF-8"
+	assertEquals(200, responseEntityGet.status)
+	assertEquals(responseEntityGet.getField("saludo"), nuevoSaludoDefault)
+}
+```
+
+Pueden ver ustedes el resto de los tests.
 
 ## Resumen de la arquitectura
 
