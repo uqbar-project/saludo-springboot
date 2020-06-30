@@ -42,7 +42,7 @@ class SaludoController {
 
 class Saludador {
 	static int ultimoId = 1
-	static String DODAIN = "dodain"
+	public static String DODAIN = "dodain"
 
 	@Accessors String saludoDefault = "Hola mundo!"
 	
