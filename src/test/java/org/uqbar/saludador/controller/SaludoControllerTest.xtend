@@ -26,8 +26,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 class SaludoControllerTest {
 
-	// https://thepracticaldeveloper.com/2020/06/04/guide-spring-boot-controller-tests/
-	
 	@Autowired
 	MockMvc mockMvc
 

@@ -1,5 +1,7 @@
 # Primer ejemplo Servicio REST: Saludo con Springboot
 
+[![Build Status](https://travis-ci.com/uqbar-project/saludo-springboot.svg?branch=master)](https://travis-ci.com/uqbar-project/saludo-springboot)
+
 ## El proyecto
 
 Antes que nada, la idea de este proyecto es que te sirva como base para poder desarrollar el backend en la materia [Algoritmos 3](https://algo3.uqbar-project.org/). Por eso está basado en _Maven_, y el archivo `pom.xml` tiene dependencias a
@@ -307,7 +309,32 @@ Para más información pueden investigar:
 
 ## Testeo unitario de endpoints
 
+Para el testeo de endpoints, recomendamos [leer este artículo](https://thepracticaldeveloper.com/2020/06/04/guide-spring-boot-controller-tests/). Lo primero que debemos hacer es encontrar los escenarios para ejecutar los tests:
 
+- cuando pedimos el saludo default, nos tiene que devolver "Hola mundo!"
+- actualizar el saludo default tiene dos casos:
+  - el inválido según reglas de negocio, tiene que fallar (pero el error debe ser de usuario, lo que equivale a un `400`)
+  - el válido debe actualizar cuando le pidamos nuevamente el saludo default
+- el saludo custom debe devolver el saludo específico según las reglas de negocio
+
+Un dato interesante es que si primero se ejecuta el test que cambia el saludo default, eso no debe interferir en el primer test, que espera una respuesta en base a la configuración inicial.
+
+Veamos entonces cómo configurar el grupo de tests:
+
+```xtend
+@AutoConfigureJsonTesters
+@ContextConfiguration(classes=SaludoController)
+@WebMvcTest
+@DisplayName("Dado un controller de saludo")
+@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
+class SaludoControllerTest {
+
+	@Autowired
+	MockMvc mockMvc
+```
+
+- `@ContextConfiguration` arma una configuración de Spring para testeo, allí debemos especificar cuál es el o los controllers que estamos testeando
+- `@AutoConfigureJsonTesters` permite que podamos
 
 ## Resumen de la arquitectura
 
