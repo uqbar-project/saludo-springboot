@@ -307,6 +307,23 @@ Para más información pueden investigar:
 - [la especificación RFC-7231](https://tools.ietf.org/html/rfc7231#section-4.2.2)
 - [el artículo de Mozilla](https://developer.mozilla.org/en-US/docs/Glossary/idempotent)
 
+## Saludo custom
+
+Para el saludo custom, vamos a hacer un pedido GET donde dentro de la URI queremos enviar a qué persona saludar. Springboot permite parametrizar el valor recibido y guardarlo en un String para usarlo posteriormente, como vamos a ver aquí:
+
+```xtend
+@GetMapping(value = "/saludo/{persona}")
+def darSaludoCustom(@PathVariable String persona) {
+  this.saludador.buildSaludoCustom("Hola " + persona + "!")
+}
+```
+
+Esto se prueba en un navegador o POSTMAN:
+
+```
+http://localhost:8080/saludo/Julian
+```
+
 ## Testeo unitario de endpoints
 
 Para el testeo de endpoints, recomendamos [leer este artículo](https://thepracticaldeveloper.com/2020/06/04/guide-spring-boot-controller-tests/). Lo primero que debemos hacer es encontrar los escenarios para ejecutar los tests:
@@ -392,3 +409,4 @@ Pueden ver ustedes el resto de los tests.
 
 ## Resumen de la arquitectura
 
+![Arquitectura general](./images/ArquitecturaSaludoSpringboot.png)
