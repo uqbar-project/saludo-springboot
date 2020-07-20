@@ -2,36 +2,6 @@
 
 [![Build Status](https://travis-ci.com/uqbar-project/saludo-springboot.svg?branch=master)](https://travis-ci.com/uqbar-project/saludo-springboot)
 
-## El proyecto
-
-Antes que nada, la idea de este proyecto es que te sirva como base para poder desarrollar el backend en la materia [Algoritmos 3](https://algo3.uqbar-project.org/). Por eso está basado en _Maven_, y el archivo `pom.xml` tiene dependencias a
-
-- Spring Boot
-- JUnit 5
-- la última versión actual de Xtend
-- además de estar basado en la JDK 11
-
-### Pasos para adaptar tu proyecto de Algo2 a Algo3
-
-El proceso más simple para que puedan reutilizar el proyecto de Algo2 en Algo3 es:
-
-- generar una copia de todo el directorio que contiene este proyecto
-- eliminar la carpeta `.git` que está oculta
-- renombrar en el `pom.xml` los valores para `artifactId`, `name` y `description` para que tengan el nombre de tu proyecto
-
-```xml
-	<groupId>org.uqbar</groupId>
-	<artifactId>---- nombre del proyecto ----</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<packaging>war</packaging>
-	<name>---- nombre del proyecto ----</name>
-	<description>---- acá va la description ----</description>
-```
-
-- si hay alguna dependencia extra del proyecto de Algo2, los docentes les vamos a avisar, en principio no necesitan ninguna dependencia adicional
-- copian del proyecto de Algo2 las carpetas `src/main/java` y `src/test/java` y la ubican en el mismo lugar en el proyecto de Algo3
-- luego tendrán que renombrar con un Refactor en Eclipse las clases `SaludadorApplication` y `SaludadorController`
-
 ## Qué es Spring Boot
 
 ![spring-boot logo](./images/spring-boot-logo.png)
