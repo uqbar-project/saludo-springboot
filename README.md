@@ -31,8 +31,8 @@ Para profundizar más te recomendamos leer [el artículo introductorio a la Arqu
 Queremos poder
 
 - recibir un saludo que por defecto sea "Hola mundo!"
-- configurar ese saludo
-- poder parametrizar el saludo a una persona
+- configurar ese saludo, poder cambiarlo
+- hacer un saludo parametrizado a una determinada persona
 
 ## Controller / Endpoints / Rutas
 
@@ -76,6 +76,11 @@ class Saludador {
   def buildSaludo() {
     buildSaludoCustom(this.saludoDefault)
   }
+
+	def buildSaludoCustom(String mensaje) {
+		new Saludo(ultimoId++, mensaje)
+	}
+
 }
 
 @Data
@@ -153,7 +158,7 @@ Para probar nuestro endpoint utilizaremos [POSTMAN](https://www.postman.com/down
 
 - configurar el endpoint
 - definirle el método PUT
-- ir a la solapa body y escribir un saludo default
+- ir a la solapa body y escribir un saludo default (lo que constituye nuestro _payload_)
 - ejecutar el endpoint
 
 ![calling put method](./images/putMethod.gif)
@@ -216,7 +221,7 @@ El contrato de los errores de http es:
 | Código de error | Qué indica |
 | --- | --- |
 | 20x (200, 201, 202...) | Todo anduvo ok |
-| 40x (400, 401, 402...) | Error de usuario (faltan parámetros, faltan permisos, no estás autenticado, no existe lo que quiero actualizar, etc.) |
+| 40x (400, 401, 402...) | Error de usuario (400 - faltan parámetros, 401 - no estás autenticado, 403 - faltan permisos, 404 - no existe lo que quiero actualizar, etc.) |
 | 50x (500, 501, 502...) | Error de programa (división por cero, referencia nula, etc.) |
 
 Para más referencia pueden ver https://http.cat/, https://httpstatusdogs.com/, entre otros.
@@ -247,6 +252,8 @@ Ahora sí, cuando queremos saludar a Dodain, en lugar de un 500 recibimos un 400
     "path": "/saludoDefault"
 }
 ```
+
+Una observación más: si hubiera otra causa posible de error (supongamos un problema de autenticación, o un recurso que no existe) deberíamos contemplar esos casos con valores de retorno adecuados: es conveniente discriminar los diferentes tipos de error para ayudar al usuario (sea una aplicación o una persona).
 
 ### Contrato general para métodos de una API REST
 
