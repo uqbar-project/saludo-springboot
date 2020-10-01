@@ -34,7 +34,7 @@ class SaludoControllerTest {
 	def void testObtenerSaludoDefault() {
 		val responseEntity = mockMvc.perform(MockMvcRequestBuilders.get("/saludoDefault")).andReturn.response
 		assertEquals(200, responseEntity.status)
-		assertEquals(responseEntity.getField("saludo"), "Hola mundo!")
+		assertEquals(responseEntity.getField("mensaje"), "Hola mundo!")
 	}
 
 	@DisplayName("actualizar el saludo a un valor inválido produce un error de usuario")
@@ -53,7 +53,7 @@ class SaludoControllerTest {
 		val responseEntityGet = mockMvc.perform(MockMvcRequestBuilders.get("/saludoDefault")).andReturn.response
 		responseEntityGet.characterEncoding = "UTF-8"
 		assertEquals(200, responseEntityGet.status)
-		assertEquals(responseEntityGet.getField("saludo"), nuevoSaludoDefault)
+		assertEquals(responseEntityGet.getField("mensaje"), nuevoSaludoDefault)
 	}
 	
 	@DisplayName("el saludo custom produce un saludo específico")
@@ -61,7 +61,7 @@ class SaludoControllerTest {
 	def void testObtenerSaludoCustom() {
 		val responseEntity = mockMvc.perform(MockMvcRequestBuilders.get("/saludo/manola")).andReturn.response
 		assertEquals(200, responseEntity.status)
-		assertEquals(responseEntity.getField("saludo"), "Hola manola!")
+		assertEquals(responseEntity.getField("mensaje"), "Hola manola!")
 	}
 
 	/**

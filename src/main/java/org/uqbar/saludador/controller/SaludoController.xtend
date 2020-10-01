@@ -36,7 +36,7 @@ class SaludoController {
     		throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.message)
     	}
     }
-    
+
 }
 
 
@@ -65,7 +65,7 @@ class Saludador {
 @Data
 class Saludo {
 	int id
-	String saludo
+	String mensaje
 	LocalDateTime fechaCreacion = LocalDateTime.now
 }
 
