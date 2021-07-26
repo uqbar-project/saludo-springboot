@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.server.ResponseStatusException
+import org.uqbar.saludador.errors.BusinessException
 
 @RestController
 class SaludoController {
@@ -33,12 +33,8 @@ class SaludoController {
 	@PutMapping(value = "/saludoDefault")
 	@ApiOperation("Actualiza el valor del nuevo saludo por defecto")
     def actualizarSaludo(@RequestBody String nuevoSaludo) {
-    	try {
-	        this.saludador.cambiarSaludoDefault(nuevoSaludo)
-	        new ResponseEntity("Se actualizó el saludo correctamente", HttpStatus.OK)
-    	} catch (BusinessException e) {
-    		throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.message)
-    	}
+        this.saludador.cambiarSaludoDefault(nuevoSaludo)
+        new ResponseEntity("Se actualizó el saludo correctamente", HttpStatus.OK)
     }
 
 }
@@ -73,12 +69,4 @@ class Saludo {
 	int id
 	String mensaje
 	LocalDateTime fechaCreacion = LocalDateTime.now
-}
-
-class BusinessException extends RuntimeException {
-	
-	new(String msg) {
-		super(msg)
-	}
-
 }
