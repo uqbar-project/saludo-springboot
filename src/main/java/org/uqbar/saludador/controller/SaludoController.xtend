@@ -1,5 +1,6 @@
 package org.uqbar.saludador.controller
 
+import io.swagger.annotations.ApiOperation
 import java.time.LocalDateTime
 import org.eclipse.xtend.lib.annotations.Accessors
 import org.eclipse.xtend.lib.annotations.Data
@@ -18,16 +19,19 @@ class SaludoController {
 	Saludador saludador = new Saludador()
 	
 	@GetMapping(value = "/saludoDefault")
+	@ApiOperation("Devuelve un saludo por defecto")
     def darSaludo() {
         this.saludador.buildSaludo()
     }
 
 	@GetMapping(value = "/saludo/{persona}")
+	@ApiOperation("Devuelve un saludo personalizado, requiere la persona a saludar")
     def darSaludoCustom(@PathVariable String persona) {
         this.saludador.buildSaludoCustom("Hola " + persona + "!")
     }
 
 	@PutMapping(value = "/saludoDefault")
+	@ApiOperation("Actualiza el valor del nuevo saludo por defecto")
     def actualizarSaludo(@RequestBody String nuevoSaludo) {
     	try {
 	        this.saludador.cambiarSaludoDefault(nuevoSaludo)
@@ -62,6 +66,8 @@ class Saludador {
 	}
 }
 
+// Excluido de JaCoCo ya que es un Data Class
+@Generated
 @Data
 class Saludo {
 	int id

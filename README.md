@@ -1,6 +1,6 @@
 # Primer ejemplo Servicio REST: Saludo con Springboot
 
-[![Build Status](https://travis-ci.com/uqbar-project/saludo-springboot.svg?branch=master)](https://travis-ci.com/uqbar-project/saludo-springboot)
+[![build](https://github.com/uqbar-project/saludo-springboot/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/uqbar-project/saludo-springboot/actions/workflows/build.yml) ![Coverage](./.github/badges/jacoco.svg)
 
 ## Qué es Spring Boot
 
@@ -168,6 +168,12 @@ En el video vemos cómo levantamos la aplicación, luego vamos a POSTMAN, creamo
 Si ahora hacemos el pedido vía GET, veremos que nuestro saludo default se modificó:
 
 ![get method after put](./images/getMethodAfterPut.gif)
+
+## TODO: Swagger
+
+## TODO: JaCoCo => Generated
+
+https://www.baeldung.com/jacoco-report-exclude
 
 ## Manejo de errores y códigos HTTP
 
