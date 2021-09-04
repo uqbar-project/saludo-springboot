@@ -4,8 +4,6 @@ import io.swagger.annotations.ApiOperation
 import java.time.LocalDateTime
 import org.eclipse.xtend.lib.annotations.Accessors
 import org.eclipse.xtend.lib.annotations.Data
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
@@ -34,7 +32,7 @@ class SaludoController {
 	@ApiOperation("Actualiza el valor del nuevo saludo por defecto")
     def actualizarSaludo(@RequestBody String nuevoSaludo) {
         this.saludador.cambiarSaludoDefault(nuevoSaludo)
-        new ResponseEntity("Se actualizó el saludo correctamente", HttpStatus.OK)
+        "Se actualizó el saludo correctamente"
     }
 
 }

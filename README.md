@@ -83,6 +83,7 @@ class Saludador {
 
 }
 
+@Generated
 @Data
 class Saludo implements Serializable {
   int id
@@ -94,7 +95,7 @@ class Saludo implements Serializable {
 ![build saludo](./images/buildSaludoDefault.png)
 
 - el Saludador guarda como estado el saludo default
-- el Saludo es un _value object_, que el Controller exporta como resultado convirtiéndolo por default en JSON (publica **todas sus variables de instancia**)
+- el Saludo es un _value object_, que el Controller exporta como resultado convirtiéndolo por default en JSON (publica **todas sus variables de instancia**). Lo anotamos con `@Generated` para excluirlo de JaCoCo, [el proceso que mide la cobertura de los tests](https://www.baeldung.com/jacoco-report-exclude) (ya que es un objeto que tiene un comportamiento generado que no llegamos a ver y no tiene sentido generar tests sobre eso).
 
 ### Mapeo de Rutas
 
@@ -169,11 +170,26 @@ Si ahora hacemos el pedido vía GET, veremos que nuestro saludo default se modif
 
 ![get method after put](./images/getMethodAfterPut.gif)
 
-## TODO: Swagger
+## Swagger
 
-## TODO: JaCoCo => Generated
+En la solución vamos a agregar la anotación `@ApiOperation` sobre los controllers, 
 
-https://www.baeldung.com/jacoco-report-exclude
+```xtend
+@GetMapping(value = "/saludoDefault")
+@ApiOperation("Devuelve un saludo por defecto")
+def darSaludo() {
+```
+
+La dependencia **Swagger** permite construir una documentación online en base a estas anotaciones, e incluso provee una interfaz como alternativa para probar manualmente tus controllers:
+
+```bash
+http://localhost:8080/swagger-ui/index.html
+```
+
+![swagger](./images/swagger.png)
+
+Les recomendamos muy fuertemente que utilicen esta biblioteca como estrategia de documentación.
+
 
 ## Manejo de errores y códigos HTTP
 
@@ -232,18 +248,11 @@ El contrato de los errores de http es:
 
 Para más referencia pueden ver https://http.cat/, https://httpstatusdogs.com/, entre otros.
 
-Modificamos entonces nuestra respuesta cuando ocurra un error de negocio, en el controller:
+Agregamos una anotación en nuestra excepción custom para decirle a Springboot que cada vez que reciba esta excepción, devuelva un código de http 400:
 
 ```xtend
-@PutMapping(value = "/saludoDefault")
-def actualizarSaludo(@RequestBody String nuevoSaludo) {
-  try {
-    this.saludador.cambiarSaludoDefault(nuevoSaludo)
-    new ResponseEntity("Se actualizó el saludo correctamente", HttpStatus.OK)
-  } catch (BusinessException e) {
-    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.message)
-  }
-}
+@ResponseStatus(BAD_REQUEST)
+class BusinessException extends RuntimeException {
 ```
 
 Ahora sí, cuando queremos saludar a Dodain, en lugar de un 500 recibimos un 400 (BAD_REQUEST), que permite a nuestro cliente entender más la causa del problema:
@@ -372,19 +381,18 @@ Podríamos chequear el mensaje de error, esto acopla un poco más el test a la r
 El tercer test tiene como parte interesante que estamos forzando el character set a UTF-8 para no tener problemas con las tildes (algo que Spring Boot decidió cambiar a partir de la versión 2.2.0). Luego lo que hace es bastante directo:
 
 - actualiza el saludo default
-- para luego verificar mediante una llamada GET
+- para luego hacer una llamada GET y verificar que en el body la actualización haya tomado efecto
 
 ```xtend
 @DisplayName("actualizar el saludo a un valor válido actualiza correctamente")
 @Test
 def void testActualizarSaludoDefaultOk() {
 	val nuevoSaludoDefault = "Hola San Martín!"
-	val responseEntityPut = mockMvc.perform(MockMvcRequestBuilders.put("/saludoDefault").content(nuevoSaludoDefault)).andReturn.response
-	assertEquals(200, responseEntityPut.status)
-	val responseEntityGet = mockMvc.perform(MockMvcRequestBuilders.get("/saludoDefault")).andReturn.response
-	responseEntityGet.characterEncoding = "UTF-8"
-	assertEquals(200, responseEntityGet.status)
-	assertEquals(responseEntityGet.getField("saludo"), nuevoSaludoDefault)
+	mockMvc.perform(MockMvcRequestBuilders.put("/saludoDefault").content(nuevoSaludoDefault))
+		.andExpect(status.isOk)
+	mockMvc.perform(MockMvcRequestBuilders.get("/saludoDefault"))
+		.andExpect(status.isOk)
+		.andExpect(jsonPath("$.mensaje").value(nuevoSaludoDefault))
 }
 ```
 
