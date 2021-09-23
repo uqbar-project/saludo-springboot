@@ -95,7 +95,7 @@ class Saludo implements Serializable {
 ![build saludo](./images/buildSaludoDefault.png)
 
 - el Saludador guarda como estado el saludo default
-- el Saludo es un _value object_, que el Controller exporta como resultado convirtiéndolo por default en JSON (publica **todas sus variables de instancia**). Lo anotamos con `@Generated` para excluirlo de JaCoCo, [el proceso que mide la cobertura de los tests](https://www.baeldung.com/jacoco-report-exclude) (ya que es un objeto que tiene un comportamiento generado que no llegamos a ver y no tiene sentido generar tests sobre eso).
+- el Saludo es un _value object_, que el Controller exporta como resultado convirtiéndolo por default en JSON (publica **todas sus variables de instancia**). Lo anotamos con `@Generated` para excluirlo de JaCoCo, [el proceso que mide la cobertura de los tests](https://www.baeldung.com/jacoco-report-exclude) (ya que es un objeto que tiene un comportamiento generado y no tiene sentido generar tests sobre eso).
 
 ### Mapeo de Rutas
 
@@ -142,7 +142,7 @@ Veamos la definición del controller:
 @PutMapping(value = "/saludoDefault")
 def actualizarSaludo(@RequestBody String nuevoSaludo) {
   this.saludador.saludoDefault = nuevoSaludo
-  new ResponseEntity("Se actualizó el saludo correctamente", HttpStatus.OK)
+  "Se actualizó el saludo correctamente"
 }
 ```
 
@@ -195,11 +195,8 @@ Les recomendamos muy fuertemente que utilicen esta biblioteca como estrategia de
 
 Surge un agregado: no queremos que se pueda configurar "Dodain" como saludo default. Esta restricción, ¿dónde la ubicamos?
 
-- en el controller
-- en el Saludador
-- en el constructor del objeto saludo
-
-El objeto saludo es un value object, su objetivo es proveer un saludo inmutable. Es extraño tener una validación en el constructor, podríamos evitar esa llamada. Por otra parte, el controller tiene como objetivos adaptar los pedidos por http para que sean recibidos por el negocio que trabaja con el modelo de objetos. Si tenemos alguna otra forma de acceder a los objetos de negocio, tendremos que duplicar esa validación en algún otro lado. No parece ser responsabilidad del controller agregar este control que es propio del dominio.
+- en el controller: es un problema si varios pedidos http tienen que incorporar esta restricción. La validación es del negocio.
+- en el Saludador: sin dudas el objeto que tiene que construir cada saludo y donde se almacena el saludo por defecto.
 
 Entonces modificamos un poco el negocio, para tener un método cambiarSaludo en Saludador, y hacemos que el controller llame a ese método:
 
