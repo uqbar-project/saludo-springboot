@@ -6,7 +6,7 @@
 
 ![spring-boot logo](./images/spring-boot-logo.png)
 
-Spring es un framework para desarrollar aplicaciones web que corre sobre una JDK Java. Tiene una amplia gama de configuraciones de lenguaje (Java, Groovy, Kotlin), de herramientas de manejo de dependencias (Maven, Gradle), de servidores Web (Jetty, Tomcat, Undertow) e incluso de formas de persistir la información. Es decir, es una tecnología que permite construir una aplicación comercial desde cero. Como esto puede resultar un poco agobiante, vamos a tomar la variante **Spring Boot**, que tomará algunas decisiones iniciales por nosotros, lo que va a suavizar la curva inicial de aprendizaje de esta tecnología.
+Spring es un framework para desarrollar aplicaciones web que corre sobre una JDK Java. Tiene una amplia gama de implementaciones en distintos lenguajes (Java, Groovy, Kotlin), de herramientas de manejo de dependencias (Maven, Gradle), de servidores Web (Jetty, Tomcat, Undertow) e incluso de formas de persistir la información. Es decir, es una tecnología que permite construir una aplicación comercial desde cero. Como esto puede resultar un poco agobiante, vamos a tomar la variante **Spring Boot**, que tomará algunas decisiones iniciales por nosotros, lo que va a suavizar la curva inicial de aprendizaje de esta tecnología.
 
 ## Ejecutando el proyecto
 
@@ -14,9 +14,9 @@ El proyecto tiene un main, en la clase `SaludadorApplication`:
 
 ```xtend
 @SpringBootApplication class SaludadorApplication {
-	def static void main(String[] args) {
-		SpringApplication.run(SaludadorApplication, args)
-	}
+  def static void main(String[] args) {
+    SpringApplication.run(SaludadorApplication, args)
+  }
 }
 ```
 
@@ -31,7 +31,7 @@ Para profundizar más te recomendamos leer [el artículo introductorio a la Arqu
 Queremos poder
 
 - recibir un saludo que por defecto sea "Hola mundo!"
-- configurar ese saludo, poder cambiarlo
+- configurar ese saludo por defecto, poder cambiarlo
 - hacer un saludo parametrizado a una determinada persona
 
 ## Controller / Endpoints / Rutas
@@ -60,9 +60,9 @@ Veamos una posible solución:
 ```xtend
 @RestController
 class SaludoController {
-	
+
   Saludador saludador = new Saludador()
-	
+
   @GetMapping(value = "/saludoDefault")
   def darSaludo() {
     this.saludador.buildSaludo()
@@ -72,14 +72,14 @@ class SaludoController {
 
 class Saludador {
   @Accessors String saludoDefault = "Hola mundo!"
-	
+  
   def buildSaludo() {
     buildSaludoCustom(this.saludoDefault)
   }
 
-	def buildSaludoCustom(String mensaje) {
-		new Saludo(ultimoId++, mensaje)
-	}
+  def buildSaludoCustom(String mensaje) {
+    new Saludo(ultimoId++, mensaje)
+  }
 
 }
 
@@ -141,8 +141,8 @@ Veamos la definición del controller:
 ```xtend
 @PutMapping(value = "/saludoDefault")
 def actualizarSaludo(@RequestBody String nuevoSaludo) {
-	this.saludador.saludoDefault = nuevoSaludo
-	new ResponseEntity("Se actualizó el saludo correctamente", HttpStatus.OK)
+  this.saludador.saludoDefault = nuevoSaludo
+  new ResponseEntity("Se actualizó el saludo correctamente", HttpStatus.OK)
 }
 ```
 
@@ -338,8 +338,8 @@ Veamos entonces cómo configurar el grupo de tests
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 class SaludoControllerTest {
 
-	@Autowired
-	MockMvc mockMvc
+  @Autowired
+  MockMvc mockMvc
 ```
 
 Las configuraciones importantes son:
@@ -387,12 +387,12 @@ El tercer test tiene como parte interesante que estamos forzando el character se
 @DisplayName("actualizar el saludo a un valor válido actualiza correctamente")
 @Test
 def void testActualizarSaludoDefaultOk() {
-	val nuevoSaludoDefault = "Hola San Martín!"
-	mockMvc.perform(MockMvcRequestBuilders.put("/saludoDefault").content(nuevoSaludoDefault))
-		.andExpect(status.isOk)
-	mockMvc.perform(MockMvcRequestBuilders.get("/saludoDefault"))
-		.andExpect(status.isOk)
-		.andExpect(jsonPath("$.mensaje").value(nuevoSaludoDefault))
+  val nuevoSaludoDefault = "Hola San Martín!"
+  mockMvc.perform(MockMvcRequestBuilders.put("/saludoDefault").content(nuevoSaludoDefault))
+    .andExpect(status.isOk)
+  mockMvc.perform(MockMvcRequestBuilders.get("/saludoDefault"))
+    .andExpect(status.isOk)
+    .andExpect(jsonPath("$.mensaje").value(nuevoSaludoDefault))
 }
 ```
 
